@@ -1,50 +1,68 @@
-# Welcome to your Expo app 👋
+<p align="center">
+  <a href="https://trouthousetech.com" title="TroutHouseTech — visit trouthousetech.com">
+    <img src="./docs/trouthousetech-logo.png" alt="TroutHouseTech logo" width="72" height="72" />
+  </a>
+</p>
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  <strong>Sponsored by <a href="https://trouthousetech.com">TroutHouseTech</a></strong><br />
+  <sub>Open-source starter from the TroutHouseTech team. Learn more at <a href="https://trouthousetech.com">trouthousetech.com</a>.</sub>
+</p>
+
+---
+
+# tht-react-native-template
+
+Expo + **React Native** starter that uses **React Navigation** (no Expo Router), **Redux Toolkit**, and **typed `react-redux` hooks**—aligned with the TroutHouseTech / Roads mobile pattern (`App.tsx` → `RootNavigator`, `src/store`, `src/nav`, `src/packages/*`).
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (LTS recommended)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/) via `npx` (no global install required)
+- For device builds: [Xcode](https://developer.apple.com/xcode/) (iOS) and/or [Android Studio](https://developer.android.com/studio) (Android)
 
 ## Get started
 
-1. Install dependencies
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Start the dev server**
 
    ```bash
-   npx expo start
+   npm start
    ```
 
-In the output, you'll find options to open the app in a
+   Or: `npx expo start`
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+3. **Open the app** from the terminal UI: iOS simulator, Android emulator, Expo Go, or a [development build](https://docs.expo.dev/develop/development-builds/introduction/).
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Project layout
 
-## Get a fresh project
+| Path | Role |
+| --- | --- |
+| `index.ts` | Registers the root component; imports `react-native-gesture-handler` first. |
+| `App.tsx` | `SafeAreaProvider`, Redux `Provider`, `StatusBar`, `RootNavigator`. |
+| `src/nav/` | `NavigationContainer`, native stack, route enums / param lists. |
+| `src/store/` | `configureStore`, `app` slice, `useAppDispatch` / `useAppSelector`. |
+| `src/packages/` | Feature screens and UI (e.g. `home`). |
 
-When you're ready, run:
+## Redux
 
-```bash
-npm run reset-project
-```
+Global UI and bootstrap flags live in **`src/store/appSlice.ts`**. Add slices in `src/store/`, register them in **`src/store/reducer.ts`**, and use **`AppThunk`** from **`src/store/types.ts`** for async logic (same idea as other TroutHouseTech apps).
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Path aliases
+
+Imports use **`@/*`** from repo root (see `tsconfig.json`), e.g. `@/src/store`, `@/src/nav`.
+
+## Brand asset in this repo
+
+The README hero logo is **`docs/trouthousetech-logo.png`** (512×512 PNG, sourced from the TroutHouseTech web app asset). Replace or update that file if the brand mark changes.
 
 ## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo documentation](https://docs.expo.dev/)
+- [React Navigation](https://reactnavigation.org/)
+- [Redux Toolkit](https://redux-toolkit.js.org/)
