@@ -1,28 +1,31 @@
 # Architecture Documentation
 
-This folder contains Architecture Decision Records (ADRs) for our Next.js codebase. Each ADR documents a decision, why it was made, and how to apply it consistently.
+ADRs for **tht-react-native-template** and React Native apps created from it.
 
-## Why ADRs?
+## ADR index
 
-ADRs keep implementation consistent across the project by documenting:
-- **What** standard we follow
-- **Why** we chose it
-- **How** to apply it in everyday development
+### Shared conventions (001–009, 011–012, 015)
 
-## Next.js ADR Index
+1. [001 – Redux patterns](./001-redux-patterns.md) — Flat layers, manual thunks, zero selector functions.
+2. [002 – Component composition](./002-component-composition.md) — Thin nav, `src/packages/`.
+3. [003 – Styling rules](./003-styling-rules.md) — `StyleSheet.create` + `src/theme`.
+4. [004 – API integration](./004-api-integration.md) — `src/api/`, thunks only.
+5. [005 – File organization](./005-file-organization.md) — kebab-case, no Expo Router `app/`.
+6. [006 – Constants and utilities](./006-constants-utilities.md) — Generic formatters only.
+7. [007 – Starter template layout](./007-starter-template-layout.md) — Shipped folders and growth path.
+8. [008 – Detail screen routing](./008-detail-screen-routing.md) — `ROOT_ROUTES.*_DETAIL`, no route params.
+9. [009 – React Navigation](./009-react-navigation.md) — No Expo Router.
+11. [011 – Domain models](./011-domain-models.md) — `src/model/{entity}.ts`.
+12. [012 – Package form inputs](./012-package-form-inputs.md) — `inputs/{field}`, zero-prop modals.
+15. [015 – No SQL functions](./015-no-sql-functions.md) — Client does not own schema.
 
-1. [App Router and Route Layouts](./001-app-router-and-route-layouts.md) - Route groups, nested layouts, and ownership in `src/app`.
-2. [Rendering Strategy](./002-rendering-strategy.md) - Rules for SSG, ISR, SSR, and dynamic rendering.
-3. [Server vs Client Components](./003-server-vs-client-components.md) - Default server-component approach and client boundary guidance.
-4. [Data Fetching and Caching](./004-data-fetching-and-caching.md) - `fetch` usage, revalidation, caching, and failure handling.
-5. [Server Actions and Mutations](./005-server-actions-and-mutations.md) - Form/mutation patterns, validation, and side-effect handling.
-6. [State Management with Redux](./006-state-management-redux.md) - Global state boundaries, slice design, and store usage.
-7. [Styling with Tailwind and Global CSS](./007-styling-tailwind-and-global-css.md) - Styling conventions, composition rules, and shared tokens.
-8. [API Integration and Boundaries](./008-api-integration-and-boundaries.md) - API layer patterns, typing, and UI/data separation.
-9. [Project Structure and Naming](./009-project-structure-and-naming.md) - Folder boundaries, naming rules, and import conventions.
+### In nextjs-template only
 
-## How to Use
+- **010** — Public Express reads via Server Components.
+- **014** — Stripe Checkout return page.
 
-1. Open the ADR most relevant to your feature.
-2. Follow the approved patterns in implementation.
-3. Add new ADRs here whenever architectural decisions change.
+## How to use
+
+1. Open the ADR for your feature.
+2. Follow patterns exactly.
+3. Add ADRs when architecture changes and update this index.

@@ -6,63 +6,67 @@
 
 <p align="center">
   <strong>Sponsored by <a href="https://trouthousetech.com">TroutHouseTech</a></strong><br />
-  <sub>Open-source starter from the TroutHouseTech team. Learn more at <a href="https://trouthousetech.com">trouthousetech.com</a>.</sub>
+  <sub>Open-source starter from the TroutHouseTech team.</sub>
 </p>
 
 ---
 
 # tht-react-native-template
 
-Expo + **React Native** starter that uses **React Navigation** (no Expo Router), **Redux Toolkit**, and **typed `react-redux` hooks**—aligned with the TroutHouseTech / Roads mobile pattern (`App.tsx` → `RootNavigator`, `src/store`, `src/nav`, `src/packages/*`).
+Expo + **React Native** starter aligned with **nextjs-template** ADRs and **Roads** mobile navigation:
+
+- **React Navigation** (native stack + bottom tabs) — **no Expo Router**
+- **Redux Toolkit** with flat `dumps/` / `current/` / `builders/` / `thunks/`
+- **Auth shell** (loading → landing → sign-in → onboarding) + **2 tabs** + sample **detail** screen via `currentItem`
+
+Architecture: [`.cursor/architecture/README.md`](./.cursor/architecture/README.md)  
+Agent rules: [`.cursor/rules/AGENTS.md`](./.cursor/rules/AGENTS.md)
+
+Related templates:
+
+- [nextjs-template](https://github.com) — ADRs **010** (Server Component Express reads) and **014** (Stripe Checkout return) live there only
+- **express-server-template** — pair with `EXPO_PUBLIC_API_URL` when adding a backend
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (LTS recommended)
-- [Expo CLI](https://docs.expo.dev/get-started/installation/) via `npx` (no global install required)
-- For device builds: [Xcode](https://developer.apple.com/xcode/) (iOS) and/or [Android Studio](https://developer.android.com/studio) (Android)
+- Node.js LTS
+- `npx expo` (no global install required)
+- Xcode / Android Studio for simulators
 
 ## Get started
 
-1. **Install dependencies**
+```bash
+npm install
+npm start
+```
 
-   ```bash
-   npm install
-   ```
+Copy `.env.example` to `.env` when wiring an API.
 
-2. **Start the dev server**
+## Mock auth
 
-   ```bash
-   npm start
-   ```
-
-   Or: `npx expo start`
-
-3. **Open the app** from the terminal UI: iOS simulator, Android emulator, Expo Go, or a [development build](https://docs.expo.dev/develop/development-builds/introduction/).
+- **Sign in** with any non-empty email + password.
+- Email containing `onboarded` skips the onboarding screen (e.g. `you@onboarded.dev`).
+- **Sign out** from the Settings tab.
 
 ## Project layout
 
 | Path | Role |
 | --- | --- |
-| `index.ts` | Registers the root component; imports `react-native-gesture-handler` first. |
-| `App.tsx` | `SafeAreaProvider`, Redux `Provider`, `StatusBar`, `RootNavigator`. |
-| `src/nav/` | `NavigationContainer`, native stack, route enums / param lists. |
-| `src/store/` | `configureStore`, `app` slice, `useAppDispatch` / `useAppSelector`. |
-| `src/packages/` | Feature screens and UI (e.g. `home`). |
-
-## Redux
-
-Global UI and bootstrap flags live in **`src/store/appSlice.ts`**. Add slices in `src/store/`, register them in **`src/store/reducer.ts`**, and use **`AppThunk`** from **`src/store/types.ts`** for async logic (same idea as other TroutHouseTech apps).
+| `index.ts` | Registers root; imports `react-native-gesture-handler` first |
+| `App.tsx` | `SafeAreaProvider`, Redux `Provider`, `RootNavigator` |
+| `src/nav/` | `NavigationContainer`, auth stack, tabs, `root-screens`, `navigateRoot` |
+| `src/packages/` | Feature screens (`auth/`, `home/`, `settings/`, `item-detail-page/`) |
+| `src/store/` | Redux layers + thunks |
+| `src/api/` | `requestApi` + `EXPO_PUBLIC_API_URL` |
+| `src/model/` | Persisted entity types |
+| `src/theme/` | Shared colors |
 
 ## Path aliases
 
-Imports use **`@/*`** from repo root (see `tsconfig.json`), e.g. `@/src/store`, `@/src/nav`.
-
-## Brand asset in this repo
-
-The README hero logo is **`docs/trouthousetech-logo.png`** (512×512 PNG, sourced from the TroutHouseTech web app asset). Replace or update that file if the brand mark changes.
+`@/*` maps to the repo root (`tsconfig.json`).
 
 ## Learn more
 
-- [Expo documentation](https://docs.expo.dev/)
+- [Expo](https://docs.expo.dev/)
 - [React Navigation](https://reactnavigation.org/)
 - [Redux Toolkit](https://redux-toolkit.js.org/)

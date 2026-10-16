@@ -1,225 +1,51 @@
-# 001 - Redux Patterns (Next.js)
+# 001 - Redux Patterns (React Native)
 
 ## Status
+
 Accepted
 
 ## Context
-This ADR defines mandatory Redux patterns for **roads-seller-web** so async flows, slice state, and reducer behavior remain predictable across features.
+
+Mandatory Redux patterns for **tht-react-native-template** and apps created from it. Same flat-layer model as [nextjs-template](https://github.com) ADR 001; navigation side effects use `navigateRoot` per [009](./009-react-navigation.md) and [008](./008-detail-screen-routing.md).
 
 ## Decision
 
-### 1) Use manual thunks only (`createAsyncThunk` is forbidden)
-All async flows must be implemented as handwritten thunk functions. Do not use `createAsyncThunk`.
+### 1) Manual thunks only
 
-✅ **Do**
-```ts
-// src/store/orders/orders.thunks.ts
-import type { AppThunk } from "@/store/types";
-import { ordersLoadingStarted, ordersLoaded, ordersLoadingFailed } from "./orders.slice";
-import { fetchOrders } from "@/api/orders/client";
+Do not use `createAsyncThunk`.
 
-export const loadOrders =
-  (): AppThunk<Promise<200 | 400 | 500>> =>
-  async (dispatch) => {
-    dispatch(ordersLoadingStarted());
+### 2) Thunk signature: `AppThunk<Promise<200 | 400 | 500>>`
 
-    const response = await fetchOrders();
+Form save thunks take no arguments; read `getState().current*`. See [012](./012-package-form-inputs.md).
 
-    if (response.status === 200) {
-      dispatch(ordersLoaded(response.data));
-      return 200;
-    }
+### 3) Flat layers
 
-    dispatch(ordersLoadingFailed(response.status));
-    return response.status as 400 | 500;
-  };
-```
+| Layer | Location |
+|-------|----------|
+| Dumps | `src/store/dumps/{entity}.ts` |
+| Current | `src/store/current/{entity}.ts` |
+| Builders | `src/store/builders/{feature}Builder.ts` |
+| Config | `src/store/config/` |
 
-❌ **Don't**
-```ts
-import { createAsyncThunk } from "@reduxjs/toolkit";
+Register each as a **top-level** key in `combineReducers`.
 
-export const loadOrders = createAsyncThunk("orders/load", async () => {
-  const response = await fetch("/api/orders");
-  return response.json();
-});
-```
+### 4) Navigation in thunks
 
----
+Opening detail screens: set `current*`, then `navigateRoot(ROOT_ROUTES.*_DETAIL)` from `src/nav/root-navigation-ref.ts`. Not in reducers.
 
-### 2) Every thunk must use this signature: `AppThunk<Promise<200 | 400 | 500>>`
-Thunk return values are status-code unions. This keeps dispatch call sites explicit and consistent.
+### 5) Zero selector functions
 
-✅ **Do**
-```ts
-// src/store/types.ts
-import type { Action } from "@reduxjs/toolkit";
-import type { ThunkAction } from "redux-thunk";
-import type { RootState } from "./store";
+`useAppSelector((state) => state.<sliceKey>)` only — no transforms inside the callback. Derive with `useMemo` in components.
 
-export type AppThunk<ReturnType = void> = ThunkAction<
-  ReturnType,
-  RootState,
-  unknown,
-  Action<string>
->;
-```
+### 6) Logic-free reducers
 
-```ts
-// src/store/orders/orders.thunks.ts
-import type { AppThunk } from "@/store/types";
-
-export const saveOrder =
-  (): AppThunk<Promise<200 | 400 | 500>> =>
-  async () => {
-    return 200;
-  };
-```
-
-❌ **Don't**
-```ts
-export const saveOrder = () => async () => {
-  return true; // ambiguous return contract
-};
-```
-
-```ts
-export const saveOrder = (): any => async () => {
-  return 200; // any is not allowed
-};
-```
-
----
-
-### 3) Slice state must always include: `dumps`, `current`, `builders`, `config`
-Every feature slice uses the same top-level shape. Do not omit or rename these keys.
-
-✅ **Do**
-```ts
-type OrdersState = {
-  dumps: {
-    list: Array<{ id: string; title: string }>;
-  };
-  current: {
-    selectedOrderId: string | null;
-    status: "idle" | "loading" | "ready" | "error";
-  };
-  builders: {
-    selectedItemIds: string[];
-    step: "base" | "review" | "submit";
-  };
-  config: {
-    pageSize: number;
-    sortBy: "createdAt" | "price";
-  };
-};
-
-const initialState: OrdersState = {
-  dumps: { list: [] },
-  current: { selectedOrderId: null, status: "idle" },
-  builders: { selectedItemIds: [], step: "base" },
-  config: { pageSize: 20, sortBy: "createdAt" },
-};
-```
-
-❌ **Don't**
-```ts
-const initialState = {
-  items: [],
-  selected: null,
-  settings: {},
-}; // missing dumps/current/builders/config structure
-```
-
----
-
-### 4) Reducers must be logic-free (business logic belongs in thunks)
-Reducers only apply payloads and set flags. Validation, branching, transformation, and side effects must live in thunks/services.
-
-✅ **Do**
-```ts
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
-type OrdersState = {
-  dumps: { list: Array<{ id: string; title: string }> };
-  current: { status: "idle" | "loading" | "ready" | "error" };
-  builders: { selectedItemIds: string[]; step: "base" | "review" | "submit" };
-  config: { pageSize: number };
-};
-
-const initialState: OrdersState = {
-  dumps: { list: [] },
-  current: { status: "idle" },
-  builders: { selectedItemIds: [], step: "base" },
-  config: { pageSize: 20 },
-};
-
-const ordersSlice = createSlice({
-  name: "orders",
-  initialState,
-  reducers: {
-    ordersLoadingStarted(state) {
-      state.current.status = "loading";
-    },
-    ordersLoaded(state, action: PayloadAction<Array<{ id: string; title: string }>>) {
-      state.dumps.list = action.payload;
-      state.current.status = "ready";
-    },
-  },
-});
-```
-
-❌ **Don't**
-```ts
-const ordersSlice = createSlice({
-  name: "orders",
-  initialState,
-  reducers: {
-    ordersLoaded(state, action) {
-      // business logic in reducer (forbidden)
-      const deduped = new Map(action.payload.map((item) => [item.id, item]));
-      state.dumps.list = Array.from(deduped.values()).filter((item) => item.title.length > 3);
-      if (state.dumps.list.length > 10) {
-        state.config.pageSize = 50;
-      }
-    },
-  },
-});
-```
-
----
-
-### 5) `builders` slices must not store objects
-`builders` can contain primitives, literal unions, and arrays of primitives only. Never store nested objects/maps in `builders`.
-
-✅ **Do**
-```ts
-type BuildersState = {
-  selectedItemIds: string[];
-  activeStep: "base" | "review" | "submit";
-  hasUnsavedChanges: boolean;
-};
-```
-
-❌ **Don't**
-```ts
-type BuildersState = {
-  form: {
-    title: string;
-    filters: {
-      status: string;
-      dateRange: { from: string; to: string };
-    };
-  };
-  byId: Record<string, { enabled: boolean }>;
-};
-```
-
----
+Validation and branching live in thunks.
 
 ## Consequences
-- Async control flow is explicit and easier to trace in logs and debugging tools.
-- Thunk return contracts are stable (`200 | 400 | 500`) and easy to consume in UI orchestration.
-- Shared state shape (`dumps/current/builders/config`) reduces onboarding and review friction.
-- Reducers stay deterministic and simple to test.
-- `builders` remain serializable and lightweight for predictable state updates.
+
+Same as nextjs-template ADR 001: explicit async flow, stable thunk status codes, predictable onboarding for Roads-style mobile apps.
+
+## References
+
+- [008 – Detail screen routing](./008-detail-screen-routing.md)
+- [009 – React Navigation](./009-react-navigation.md)
